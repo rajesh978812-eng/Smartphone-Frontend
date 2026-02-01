@@ -1,0 +1,144 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FiSearch, FiPackage, FiTruck, FiMapPin, FiCheckCircle, FiClock, FiShoppingBag } from "react-icons/fi";
+import { toast } from 'react-hot-toast';
+
+const TrackOrder = () => {
+  const [orderId, setOrderId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [orderDetails, setOrderDetails] = useState(null);
+
+  // --- MOCK FUNCTION (Backend இல்லாமல் டிசைனை பார்க்க) ---
+  const handleTrack = (e) => {
+    e.preventDefault();
+    if (!orderId) return toast.error("Please enter Order ID");
+
+    setLoading(true);
+    
+    // 1.5 நொடியில் டேட்டா வருவது போல் பாவனை (Simulation)
+    setTimeout(() => {
+        setOrderDetails({
+            id: orderId,
+            product: "iPhone 15 Pro (Black Titanium)",
+            amount: 147999,
+            date: "Jan 30, 2026",
+            status: "Shipped", // இதை மாற்றினால் Timeline மாறும் ('Processing', 'Shipped', 'Delivered')
+            deliveryDate: "Feb 02, 2026"
+        });
+        setLoading(false);
+        toast.success("Order Found! 🚚");
+    }, 1500);
+  };
+
+  // Timeline Steps
+  const steps = [
+      { status: "Order Placed", date: "Jan 30, 10:00 AM", icon: <FiShoppingBag /> },
+      { status: "Processing", date: "Jan 30, 02:30 PM", icon: <FiClock /> },
+      { status: "Shipped", date: "Jan 31, 09:00 AM", icon: <FiTruck /> },
+      { status: "Out for Delivery", date: "Pending", icon: <FiMapPin /> },
+      { status: "Delivered", date: "Pending", icon: <FiCheckCircle /> }
+  ];
+
+  // Logic to calculate active step based on status
+  const getStepStatus = (stepName) => {
+      const statusOrder = ["Order Placed", "Processing", "Shipped", "Out for Delivery", "Delivered"];
+      const currentStatusIndex = statusOrder.indexOf(orderDetails?.status || "Processing");
+      const stepIndex = statusOrder.indexOf(stepName);
+      return stepIndex <= currentStatusIndex; // True if step is completed
+  };
+
+  return (
+    <div className="bg-gray-50 min-h-screen font-sans pb-20">
+      
+      {/* 1. HERO HEADER (Matches Theme) */}
+      <div className="bg-[#1a1c2e] text-white py-16 text-center relative overflow-hidden">
+         <div className="absolute top-0 left-0 w-full h-full bg-purple-600/10 mix-blend-overlay"></div>
+         <h1 className="text-3xl md:text-5xl font-bold mb-4 relative z-10">Track Your Order</h1>
+         <p className="text-gray-400 text-lg relative z-10">Enter your Order ID to get real-time updates.</p>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 -mt-8 relative z-20">
+        
+        {/* 2. SEARCH BOX CARD */}
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-100">
+            <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                    <FiPackage className="absolute left-4 top-4 text-gray-400 text-xl" />
+                    <input 
+                      type="text" 
+                      placeholder="Enter Order ID (e.g., ORD12345)"
+                      value={orderId}
+                      onChange={(e) => setOrderId(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition font-medium"
+                    />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+                >
+                   {loading ? <span className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span> : <><FiSearch /> Track</>}
+                </button>
+            </form>
+        </div>
+
+        {/* 3. ORDER STATUS RESULT */}
+        {orderDetails && (
+            <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in-up">
+                
+                {/* Header Info */}
+                <div className="bg-gray-50 p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900">{orderDetails.product}</h2>
+                        <p className="text-sm text-gray-500 mt-1">Order ID: <span className="font-mono text-gray-800">{orderDetails.id}</span></p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm text-gray-500">Expected Delivery</p>
+                        <p className="text-lg font-bold text-green-600">{orderDetails.deliveryDate}</p>
+                    </div>
+                </div>
+
+                {/* TIMELINE SECTION */}
+                <div className="p-8">
+                    <div className="relative">
+                        {/* Vertical Line for Mobile / Horizontal for Desktop logic can be tricky, using vertical for consistency */}
+                        <div className="absolute left-4 top-0 h-full w-0.5 bg-gray-200"></div>
+
+                        <div className="space-y-8 relative">
+                            {steps.map((step, index) => {
+                                const isActive = getStepStatus(step.status);
+                                return (
+                                    <div key={index} className="flex items-start gap-6 relative">
+                                        {/* Dot/Icon */}
+                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center z-10 border-2 transition-all duration-500 ${isActive ? 'bg-purple-600 border-purple-600 text-white scale-110 shadow-lg' : 'bg-white border-gray-300 text-gray-400'}`}>
+                                            {step.icon}
+                                        </div>
+                                        
+                                        {/* Content */}
+                                        <div className={`transition-all duration-500 ${isActive ? 'opacity-100 translate-x-0' : 'opacity-50'}`}>
+                                            <h4 className={`font-bold text-lg ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>{step.status}</h4>
+                                            <p className="text-sm text-gray-400">{isActive ? step.date : ''}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer Action */}
+                <div className="p-4 bg-purple-50 flex justify-center">
+                    <Link to="/contact" className="text-purple-700 font-bold hover:underline text-sm">
+                        Need help with this order? Contact Support
+                    </Link>
+                </div>
+
+            </div>
+        )}
+
+      </div>
+    </div>
+  );
+};
+
+export default TrackOrder;

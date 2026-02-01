@@ -1,0 +1,139 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const About = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 pb-10">
+      
+      {/* 1. HERO SECTION (Modern Gradient Design) */}
+      <div className="relative bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-900 text-white py-24 text-center px-4 overflow-hidden">
+        {/* Background Decorative Circles */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
+            About <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200">Us</span>
+          </h1>
+          <p className="text-lg md:text-xl text-purple-100 max-w-2xl mx-auto leading-relaxed font-light">
+            Empowering your digital life with the latest technology and best-in-class service. We bring the future to your fingertips.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 -mt-10 relative z-20">
+        
+        {/* 2. OUR STORY SECTION */}
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-20">
+          <div className="grid md:grid-cols-2 items-center">
+            
+            {/* Text Content */}
+            <div className="p-8 md:p-12 order-2 md:order-1">
+              <span className="text-purple-600 font-bold tracking-wider uppercase text-sm">Our Journey</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 mt-2">Who We Are</h2>
+              
+              <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                Founded in 2020, <strong>Smartphone Store</strong> has come a long way from its beginnings. When we first started out, our passion for <span className="italic text-purple-700">"technology for everyone"</span> drove us to start our own business.
+              </p>
+              <p className="text-gray-600 text-lg leading-relaxed mb-8">
+                We are dedicated to providing you the very best of mobile phones, with an emphasis on <span className="font-semibold text-purple-700 bg-purple-50 px-2 py-1 rounded">authentic products</span>, <span className="font-semibold text-purple-700 bg-purple-50 px-2 py-1 rounded">express delivery</span>, and <span className="font-semibold text-purple-700 bg-purple-50 px-2 py-1 rounded">customer support</span>.
+              </p>
+              
+              {/* Stats Grid (Responsive) */}
+              <div className="grid grid-cols-3 gap-4 border-t border-gray-100 pt-8">
+                 <div className="text-center md:text-left">
+                    <h3 className="text-3xl md:text-4xl font-extrabold text-purple-600">5+</h3>
+                    <p className="text-xs md:text-sm text-gray-500 font-medium uppercase mt-1">Years Experience</p>
+                 </div>
+                 <div className="text-center md:text-left border-l border-gray-200 pl-4">
+                    <h3 className="text-3xl md:text-4xl font-extrabold text-purple-600">10k+</h3>
+                    <p className="text-xs md:text-sm text-gray-500 font-medium uppercase mt-1">Happy Customers</p>
+                 </div>
+                 <div className="text-center md:text-left border-l border-gray-200 pl-4">
+                    <h3 className="text-3xl md:text-4xl font-extrabold text-purple-600">100%</h3>
+                    <p className="text-xs md:text-sm text-gray-500 font-medium uppercase mt-1">Genuine Products</p>
+                 </div>
+              </div>
+            </div>
+            
+            {/* Image Content */}
+            <div className="order-1 md:order-2 h-full min-h-[300px] md:min-h-[500px] relative">
+              <img 
+                src="/About1.jpeg" 
+                alt="Our Team" 
+                className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+                onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1632&q=80" }} // Fallback image
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. WHY CHOOSE US (Grid) */}
+        <div className="text-center mb-20">
+          <span className="text-purple-600 font-bold tracking-wider uppercase text-sm">Our Values</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 mt-2">Why Choose Us?</h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            
+            {/* Feature 1 */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-4xl mb-6 mx-auto group-hover:scale-110 transition-transform">
+                💎
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-purple-600 transition-colors">Premium Quality</h3>
+              <p className="text-gray-600 leading-relaxed text-sm">
+                We guarantee 100% genuine products sourced directly from top global brands with valid manufacturer warranties.
+              </p>
+            </div>
+            
+            {/* Feature 2 */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-4xl mb-6 mx-auto group-hover:scale-110 transition-transform">
+                🚚
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-purple-600 transition-colors">Fast Delivery</h3>
+              <p className="text-gray-600 leading-relaxed text-sm">
+                We value your time. Get your favorite gadgets delivered to your doorstep quickly and safely with our premium logistics.
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 group">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-4xl mb-6 mx-auto group-hover:scale-110 transition-transform">
+                🎧
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-purple-600 transition-colors">24/7 Support</h3>
+              <p className="text-gray-600 leading-relaxed text-sm">
+                Have questions? Our dedicated customer support team is here to assist you with any queries or issues around the clock.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. CALL TO ACTION */}
+        <div className="relative bg-[#1a1c2e] rounded-3xl p-8 md:p-16 text-center overflow-hidden shadow-2xl">
+          {/* Background effects */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+          
+          <div className="relative z-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Upgrade?</h2>
+            <p className="text-gray-300 mb-10 max-w-2xl mx-auto text-lg leading-relaxed">
+              Explore our latest collection of smartphones and accessories today. Experience the best technology at unbeatable prices.
+            </p>
+            <Link 
+              to="/products" 
+              className="inline-block bg-white text-purple-900 px-10 py-4 rounded-full font-bold hover:bg-purple-50 hover:scale-105 transition-all duration-300 shadow-lg"
+            >
+              Shop Now
+            </Link>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default About;

@@ -1,0 +1,324 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { fetchProducts, addProductReview } from '../services/api';
+import { toast } from 'react-hot-toast';
+import ProductCard from '../components/ProductCard';
+
+const ProductDetails = ({ addToCart, wishlistItems, toggleWishlist }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  
+  const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Review States
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Selected Variants (Visual Only for UI feel)
+  const [selectedStorage, setSelectedStorage] = useState("");
+
+  const getImageUrl = (img) => {
+    if (!img) return "https://via.placeholder.com/400?text=No+Image";
+    if (img.startsWith("http") || img.startsWith("/")) return img;
+    return `/${img}`;
+  };
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        setLoading(true);
+        const { data } = await fetchProducts();
+        const foundProduct = data.products.find((p) => p._id === id);
+        
+        if (foundProduct) {
+            setProduct(foundProduct);
+            setSelectedStorage(foundProduct.storage); // Default storage select
+            
+            // Related Products Logic
+            const related = data.products.filter(
+                (p) => p.brand === foundProduct.brand && p._id !== foundProduct._id
+            ).slice(0, 4);
+            setRelatedProducts(related);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error:", error);
+        setLoading(false);
+      }
+    };
+    window.scrollTo(0, 0);
+    getData();
+  }, [id, refreshKey]);
+
+  const submitReviewToggle = async () => {
+    const userInfo = localStorage.getItem("userInfo");
+    if (!userInfo) {
+        toast.error("Please Login to submit a review!");
+        navigate("/login");
+        return;
+    }
+    if (rating === 0) return toast.error("Select a star rating! ⭐");
+    if (!comment) return toast.error("Write a comment! 📝");
+
+    try {
+      await addProductReview({ productId: id, rating, comment });
+      toast.success("Review Submitted Successfully!");
+      setComment("");
+      setRating(0);
+      setRefreshKey(old => old + 1);
+    } catch (error) {
+        toast.error(error.response?.data?.message || "Review Failed");
+    }
+  };
+
+  if (loading) return <div className="min-h-screen flex justify-center items-center"><div className="animate-spin h-12 w-12 border-4 border-purple-600 rounded-full border-t-transparent"></div></div>;
+  if (!product) return <div className="text-center py-20">Product Not Found</div>;
+
+  const discount = Math.round(((product.mrp - product.price) / product.mrp) * 100);
+  const isWishlisted = wishlistItems?.some((item) => item._id === product._id);
+
+  return (
+    <div className="bg-white min-h-screen pb-20 font-sans">
+      
+      {/* 1. COMPACT NAVBAR / BREADCRUMB */}
+      <div className="bg-gray-100 py-2 px-4 text-xs text-gray-600 sticky top-16 z-30">
+        <div className="max-w-7xl mx-auto flex items-center gap-2">
+            <Link to="/" className="hover:text-blue-600">Home</Link> › 
+            <Link to="/products" className="hover:text-blue-600">Mobiles</Link> › 
+            <span className="truncate font-medium text-gray-800">{product.name}</span>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-12 gap-8 mt-2">
+        
+        {/* --- LEFT: IMAGES & BUTTONS (5 Columns) --- */}
+        <div className="md:col-span-5 relative">
+            {/* Main Image */}
+            <div className="border border-gray-200 rounded-xl p-4 flex justify-center items-center h-[450px] relative group bg-white sticky top-24">
+                <div className="absolute top-4 right-4 z-20">
+                    <button onClick={() => toggleWishlist && toggleWishlist(product)} className="p-2 bg-white rounded-full shadow-md border hover:scale-110 transition">
+                        {isWishlisted ? "❤️" : "🤍"}
+                    </button>
+                </div>
+                <img 
+                    src={getImageUrl(product.image)} 
+                    alt={product.name} 
+                    className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
+                />
+            </div>
+
+            {/* Desktop Action Buttons */}
+            <div className="hidden md:grid grid-cols-2 gap-3 mt-4">
+                <button 
+                    onClick={() => addToCart(product)}
+                    className="py-4 bg-[#ff9f00] text-white font-bold uppercase rounded shadow hover:bg-[#f39700] transition text-sm flex justify-center items-center gap-2"
+                >
+                    🛒 Add to Cart
+                </button>
+                <button 
+                    onClick={() => { addToCart(product); navigate("/cart"); }}
+                    className="py-4 bg-[#fb641b] text-white font-bold uppercase rounded shadow hover:bg-[#e85d19] transition text-sm flex justify-center items-center gap-2"
+                >
+                    ⚡ Buy Now
+                </button>
+            </div>
+        </div>
+
+        {/* --- RIGHT: DETAILS (7 Columns) --- */}
+        <div className="md:col-span-7 space-y-4">
+            
+            {/* Title & Ratings */}
+            <div>
+                <h1 className="text-xl md:text-2xl font-medium text-gray-900">{product.name} ({product.color}, {product.storage}GB)</h1>
+                <div className="flex items-center gap-3 mt-2">
+                    <div className="bg-green-700 text-white text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                        {product.ratings?.toFixed(1) || 4.5} ★
+                    </div>
+                    <span className="text-gray-500 text-sm font-medium">{product.numOfReviews.toLocaleString()} Ratings & Reviews</span>
+                    <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Assured" className="h-5" />
+                </div>
+            </div>
+
+            {/* Price */}
+            <div>
+                <div className="flex items-baseline gap-3">
+                    <span className="text-3xl font-medium">₹{product.price.toLocaleString()}</span>
+                    <span className="text-gray-500 line-through text-base">₹{product.mrp.toLocaleString()}</span>
+                    <span className="text-green-600 font-bold text-sm">{discount}% off</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">+ ₹69 Secured Packaging Fee</p>
+            </div>
+
+            {/* Offers (Visual) */}
+            <div className="space-y-2">
+                <h3 className="text-sm font-bold text-gray-800">Available offers</h3>
+                <div className="text-sm text-gray-700 space-y-1">
+                    <p className="flex gap-2 items-start"><span className="text-green-600">🏷️</span> <b>Bank Offer:</b> 5% Unlimited Cashback on Flipkart Axis Bank Credit Card</p>
+                    <p className="flex gap-2 items-start"><span className="text-green-600">🏷️</span> <b>Special Price:</b> Get extra ₹3000 off (price inclusive of cashback/coupon)</p>
+                    <p className="flex gap-2 items-start"><span className="text-green-600">🏷️</span> <b>Partner Offer:</b> Sign up for Flipkart Pay Later and get Flipkart Gift Card worth up to ₹500</p>
+                </div>
+            </div>
+
+            {/* Warranty */}
+            <div className="flex items-center gap-4 border border-gray-200 p-3 rounded bg-gray-50">
+                <img src="https://rukminim2.flixcart.com/www/36/36/promos/06/09/2016/c22c9fc4-0555-4460-8401-bf5c28d7ba29.png?q=90" alt="" className="h-8" />
+                <p className="text-sm text-gray-600">1 Year Warranty for Phone and 6 Months Warranty for In-Box Accessories</p>
+            </div>
+
+            {/* Visual Variant Selection (Example) */}
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <span className="text-xs text-gray-500 font-bold">Color</span>
+                    <div className="flex gap-2 mt-1">
+                        <div className="border-2 border-purple-600 p-1 rounded cursor-pointer bg-blue-50">
+                            <img src={getImageUrl(product.image)} className="w-10 h-10 object-contain" alt="" />
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <span className="text-xs text-gray-500 font-bold">Storage</span>
+                    <div className="flex gap-2 mt-1">
+                        <div className="border border-purple-600 bg-purple-50 text-purple-700 font-bold px-3 py-2 rounded text-sm cursor-pointer">
+                            {product.storage} GB
+                        </div>
+                        <div className="border border-gray-300 text-gray-500 px-3 py-2 rounded text-sm cursor-not-allowed opacity-50">
+                            512 GB
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Highlights (Specs) */}
+            <div className="flex gap-4 mt-4">
+                 <div className="w-24 text-gray-500 text-sm font-medium">Highlights</div>
+                 <ul className="text-sm text-gray-800 list-disc space-y-2 pl-4">
+                    <li>{product.ram} GB RAM | {product.storage} GB ROM</li>
+                    <li>{product.display} Display</li>
+                    <li>{product.camera} Rear Camera</li>
+                    <li>{product.battery} Battery</li>
+                    <li>Snapdragon/Dimensity Processor (Dummy Data)</li>
+                 </ul>
+            </div>
+
+            {/* Description */}
+            <div className="border border-gray-200 p-4 rounded-lg mt-4">
+                <h3 className="font-bold text-gray-800 mb-2">Product Description</h3>
+                <p className="text-sm text-gray-600 leading-relaxed text-justify">
+                    {product.description || `Experience the power of ${product.name}. Designed with precision and packed with features to enhance your daily life.`}
+                </p>
+            </div>
+
+            {/* --- RATINGS & REVIEWS SECTION --- */}
+            <div className="border border-gray-200 rounded-lg p-6 mt-8">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900">Ratings & Reviews</h2>
+                    <button 
+                        onClick={() => document.getElementById('reviewForm').scrollIntoView({ behavior: 'smooth' })}
+                        className="bg-white border border-gray-300 shadow-sm px-4 py-2 rounded text-sm font-bold hover:shadow-md"
+                    >
+                        Rate Product
+                    </button>
+                </div>
+
+                {/* Rating Summary Bar */}
+                <div className="flex items-center gap-8 mb-8 border-b border-gray-100 pb-6">
+                    <div className="text-center">
+                        <div className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-1">
+                            {product.ratings?.toFixed(1)} <span className="text-2xl text-green-600">★</span>
+                        </div>
+                        <p className="text-gray-500 text-xs mt-1">{product.numOfReviews} Reviews</p>
+                    </div>
+                    <div className="flex-1 space-y-2">
+                        {[5,4,3,2,1].map((star) => (
+                             <div key={star} className="flex items-center gap-2">
+                                <span className="text-xs font-bold w-3">{star}★</span>
+                                <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                                    <div 
+                                        className={`h-full ${star >= 4 ? 'bg-green-500' : star === 3 ? 'bg-yellow-400' : 'bg-red-500'}`} 
+                                        style={{ width: `${star === 5 ? '60%' : star === 4 ? '20%' : '5%'}` }} // Dummy Visuals
+                                    ></div>
+                                </div>
+                                <span className="text-xs text-gray-400 w-6 text-right">0</span>
+                             </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Customer Reviews */}
+                <div className="space-y-6">
+                    {product.reviews && product.reviews.length > 0 ? (
+                        product.reviews.map((rev, i) => (
+                            <div key={i} className="border-b border-gray-100 last:border-0 pb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className={`text-white text-[10px] px-1.5 py-0.5 rounded font-bold ${rev.rating >= 3 ? 'bg-green-600' : 'bg-red-500'}`}>
+                                        {rev.rating} ★
+                                    </div>
+                                    <span className="font-bold text-sm text-gray-900">{rev.comment}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
+                                    <span className="font-medium text-gray-600">{rev.name}</span>
+                                    <span>Certified Buyer</span>
+                                    <span>• 2 days ago</span>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-400 text-sm">No reviews yet.</p>
+                    )}
+                </div>
+
+                {/* Review Form */}
+                <div id="reviewForm" className="mt-8 pt-6 border-t border-gray-200">
+                    <h3 className="font-bold text-gray-800 mb-4">Rate this product</h3>
+                    <div className="flex gap-2 mb-4">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <button key={star} onClick={() => setRating(star)} className={`text-3xl transition ${star <= rating ? "text-[#ff9f00]" : "text-gray-300"}`}>★</button>
+                        ))}
+                    </div>
+                    <textarea 
+                        className="w-full border border-gray-300 rounded p-3 text-sm focus:outline-none focus:border-blue-500"
+                        rows="3"
+                        placeholder="Description..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                    ></textarea>
+                    <button onClick={submitReviewToggle} className="mt-3 bg-blue-600 text-white px-8 py-2 rounded shadow font-bold hover:bg-blue-700">SUBMIT</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      {/* --- SIMILAR PRODUCTS --- */}
+      {relatedProducts.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 mt-10 mb-20 border-t border-gray-200 pt-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Similar Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {relatedProducts.map(p => <ProductCard key={p._id} product={p} wishlistItems={wishlistItems} toggleWishlist={toggleWishlist} />)}
+            </div>
+        </div>
+      )}
+
+      {/* --- MOBILE STICKY FOOTER --- */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex md:hidden z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+         <button 
+           onClick={() => addToCart(product)}
+           className="flex-1 bg-white text-black font-bold py-4 text-sm uppercase border-r border-gray-200"
+         >
+           Add to Cart
+         </button>
+         <button 
+           onClick={() => { addToCart(product); navigate("/cart"); }}
+           className="flex-1 bg-[#fb641b] text-white font-bold py-4 text-sm uppercase"
+         >
+           Buy Now
+         </button>
+      </div>
+
+    </div>
+  );
+};
+
+export default ProductDetails;
