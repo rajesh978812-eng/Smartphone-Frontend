@@ -52,20 +52,20 @@ const ProductDetails = ({ addToCart, wishlistItems, toggleWishlist }) => {
     }
   };
 
-  // --- DATA FETCHING ---
+ // --- DATA FETCHING ---
   useEffect(() => {
     const getData = async () => {
       try {
         setLoading(true);
-        // 1. Fetch Single Product
-        const { data } = await axios.get(`http://localhost:8000/api/products/${id}`);
+        // மாற்றம் 1: Localhost-ஐ Render Link ஆக மாற்றப்பட்டது
+        const { data } = await axios.get(`https://smartphone-backend-rgjm.onrender.com/api/products/${id}`);
         const foundProduct = data.product;
         
         setProduct(foundProduct);
         setSelectedImage(getImageUrl(foundProduct.image));
 
-        // 2. Fetch Related Products
-        const allProductsRes = await axios.get(`http://localhost:8000/api/products`);
+        // மாற்றம் 2: Related Products-க்கும் Link மாற்றப்பட்டது
+        const allProductsRes = await axios.get(`https://smartphone-backend-rgjm.onrender.com/api/products`);
         const related = allProductsRes.data.products.filter(
             (p) => p.brand === foundProduct.brand && p._id !== foundProduct._id
         ).slice(0, 4);
@@ -81,8 +81,8 @@ const ProductDetails = ({ addToCart, wishlistItems, toggleWishlist }) => {
     window.scrollTo(0, 0); 
     getData();
   }, [id, refreshKey]);
-
-  // --- REVIEW SUBMIT FUNCTION ---
+  
+// --- REVIEW SUBMIT FUNCTION ---
   const submitReviewToggle = async () => {
     const userInfo = localStorage.getItem("userInfo");
     if (!userInfo) {
@@ -97,7 +97,8 @@ const ProductDetails = ({ addToCart, wishlistItems, toggleWishlist }) => {
       const user = JSON.parse(userInfo);
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
       
-      await axios.put(`http://localhost:8000/api/products/review`, { productId: id, rating, comment }, config);
+      // மாற்றம் 3: Review-க்கும் Render Link மாற்றப்பட்டது
+      await axios.put(`https://smartphone-backend-rgjm.onrender.com/api/products/review`, { productId: id, rating, comment }, config);
       
       toast.success("Review Submitted Successfully!");
       setComment("");
@@ -107,6 +108,7 @@ const ProductDetails = ({ addToCart, wishlistItems, toggleWishlist }) => {
         toast.error(error.response?.data?.message || "Review Failed");
     }
   };
+  
 
   if (loading) return (
     <div className="flex justify-center items-center h-screen bg-white">
