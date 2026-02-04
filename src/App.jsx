@@ -18,6 +18,8 @@ import MyOrders from "./pages/MyOrders";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrackOrder from "./pages/TrackOrder";
 import Profile from "./pages/Profile";
+import Compare from "./pages/Compare";
+import Repair from "./pages/Repair"; 
 
 const App = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -137,6 +139,8 @@ const App = () => {
 
             <Route path="/track-order" element={<TrackOrder />} />
             <Route path="/profile" element={<Profile setIsLoggedIn={setIsLoggedIn} />} />
+            <Route path="/compare" element={<Compare addToCart={addToCart} />} />
+            <Route path="/repair" element={<Repair />} />
           </Routes>
         </div>
 

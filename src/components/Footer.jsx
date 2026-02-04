@@ -71,6 +71,16 @@ const Footer = () => {
                   Track Order
                  </Link>
               </li>
+              <li>
+                <Link to="/compare" className="text-gray-400 hover:text-purple-400 hover:translate-x-1 transition-all duration-300 inline-block">
+                  Compare
+                 </Link>
+              </li>
+              <li>
+                <Link to="/repair" className="text-gray-400 hover:text-purple-400 hover:translate-x-1 transition-all duration-300 inline-block">
+                  Service
+                 </Link>
+              </li>
             </ul>
           </div>
 

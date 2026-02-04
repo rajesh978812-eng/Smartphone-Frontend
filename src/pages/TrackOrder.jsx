@@ -1,240 +1,228 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios'; 
+import API from '../services/api'; // நாம் உருவாக்கிய API
 import { toast } from 'react-hot-toast';
-import { FiSearch, FiPackage, FiTruck, FiMapPin, FiCheckCircle, FiClock, FiShoppingBag, FiCopy, FiAlertCircle } from "react-icons/fi";
+import { 
+  FiSearch, FiPackage, FiTruck, FiCheckCircle, FiClock, 
+  FiMapPin, FiChevronRight, FiAlertCircle, FiShoppingBag, FiCalendar 
+} from "react-icons/fi";
 
 const TrackOrder = () => {
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
-  const [userToken, setUserToken] = useState(null);
 
-  // User Token for API Calls
-  useEffect(() => {
-    const userInfo = localStorage.getItem("userInfo");
-    if (userInfo) {
-      setUserToken(JSON.parse(userInfo).token);
-    }
-  }, []);
-
+  // --- API CALL FUNCTION ---
   const handleTrack = async (e) => {
     e.preventDefault();
     if (!orderId) return toast.error("Please enter Order ID");
 
-    // Remove '#' if user types it
     const cleanId = orderId.replace('#', '').trim();
+    
+    // MongoDB ID Validation (24 chars)
+    if (cleanId.length !== 24) {
+        return toast.error("Invalid Order ID format. Check My Orders page.");
+    }
+
     setLoading(true);
     setOrderDetails(null);
 
     try {
-        // --- 1. TRY REAL API CALL (Backend Connection) ---
-        // குறிப்பு: உங்கள் Backend-ல் '/api/order/:id' என்ற route இருக்க வேண்டும்.
-        const config = { headers: { Authorization: `Bearer ${userToken}` } };
-        const { data } = await axios.get(`http://localhost:8000/api/order/${cleanId}`, config);
-        
-        setOrderDetails({
-            id: data.order._id,
-            product: data.order.cartItems.map(item => item.name).join(", "),
-            amount: data.order.amount,
-            date: new Date(data.order.createdAt).toLocaleDateString(),
-            status: data.order.status, // "Processing", "Shipped", "Delivered"
-            deliveryDate: "Estimated within 3-5 days"
-        });
-        toast.success("Order Found! 🚚");
+        // API Call
+        const { data } = await API.get(`/order/${cleanId}`);
 
+        if (data.success) {
+            setOrderDetails(data.order);
+            toast.success("Order Found! 📦");
+        } else {
+            toast.error("Order not found");
+        }
     } catch (error) {
-        console.error("Tracking Error (Using Demo Data):", error);
-        
-        // --- 2. FALLBACK DEMO DATA (API வேலை செய்யவில்லை என்றால் இது வரும்) ---
-        // நீங்கள் கேட்டபடி 'Delivered' என்று காட்ட மாற்றியுள்ளேன்
-        setTimeout(() => {
-            setOrderDetails({
-                id: cleanId,
-                product: "iPhone 15 Pro (Black Titanium) - [DEMO MODE]",
-                amount: 147999,
-                date: "Jan 30, 2026",
-                status: "Delivered", // <--- FIXED: இப்போது Delivered என்று காட்டும்
-                deliveryDate: "Feb 02, 2026"
-            });
-            toast.success("Order Found (Demo)!");
-        }, 1000);
+        console.error("Tracking Error:", error);
+        toast.error(error.response?.data?.message || "Order not found with this ID");
     } finally {
-        setTimeout(() => setLoading(false), 1000);
+        setLoading(false);
     }
   };
 
-  // Timeline Steps
-  const steps = [
-      { status: "Order Placed", label: "Order Placed", icon: <FiShoppingBag /> },
-      { status: "Processing", label: "Processing", icon: <FiClock /> },
-      { status: "Shipped", label: "Shipped", icon: <FiTruck /> },
-      { status: "Delivered", label: "Delivered", icon: <FiCheckCircle /> }
-  ];
-
-  // Logic to determine active step
-  const getStepStatus = (stepName) => {
-      const statusOrder = ["Order Placed", "Processing", "Shipped", "Delivered"];
-      // Backend Status-ஐ 'Out for Delivery' போன்றவற்றுடன் Map செய்தல்
-      let currentStatus = orderDetails?.status || "Processing";
-      
-      const currentStatusIndex = statusOrder.indexOf(currentStatus);
-      const stepIndex = statusOrder.indexOf(stepName);
-      
-      return stepIndex <= currentStatusIndex;
+  // --- STATUS STEPPER LOGIC ---
+  const getStatusStep = (status) => {
+      switch(status) {
+          case 'Processing': return 1;
+          case 'Shipped': return 2;
+          case 'Delivered': return 3;
+          default: return 0;
+      }
   };
 
-  return (
-    <div className="bg-gray-50 min-h-screen font-sans pb-20">
-      
-      {/* 1. HERO HEADER */}
-      <div className="bg-[#1a1c2e] text-white py-16 text-center relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse"></div>
-         <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
-         
-         <div className="relative z-10 px-4">
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight">Track Your Order</h1>
-            <p className="text-gray-400 text-lg max-w-xl mx-auto">
-              Enter your Order ID to verify the status and estimated delivery time.
-            </p>
-         </div>
-      </div>
+  const currentStep = orderDetails ? getStatusStep(orderDetails.status) : 0;
 
-      <div className="max-w-4xl mx-auto px-4 -mt-10 relative z-20">
-        
-        {/* 2. SEARCH BOX */}
-        <div className="bg-white p-6 md:p-10 rounded-3xl shadow-xl border border-gray-100">
-            <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative group">
-                    <FiPackage className="absolute left-4 top-4 text-gray-400 text-xl group-focus-within:text-purple-600 transition-colors" />
+  return (
+    <div className="min-h-screen bg-gray-50 font-sans pb-20">
+      
+      {/* 1. HERO HEADER (Premium Gradient) */}
+      <div className="relative bg-[#1a1c2e] text-white py-24 px-4 overflow-hidden">
+        {/* Abstract Background Animation */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-pink-600 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 animate-pulse delay-1000"></div>
+
+        <div className="relative z-10 max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight">
+              Track Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Order Status</span>
+            </h1>
+            <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+              Enter your Order ID below to get real-time updates on your shipment.
+            </p>
+
+            {/* SEARCH INPUT CARD */}
+            <div className="bg-white p-2 rounded-2xl shadow-2xl max-w-2xl mx-auto flex flex-col md:flex-row gap-2 transform translate-y-8 border border-gray-100">
+                <div className="relative flex-1">
+                    <FiSearch className="absolute left-4 top-4 text-gray-400 text-xl" />
                     <input 
-                      type="text" 
-                      placeholder="Enter Order ID (e.g., 65b7...)"
-                      value={orderId}
-                      onChange={(e) => setOrderId(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all font-medium text-gray-700 placeholder-gray-400"
+                        type="text" 
+                        placeholder="Enter Order ID (e.g., 65cf3b...)" 
+                        value={orderId}
+                        onChange={(e) => setOrderId(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white text-gray-800 font-mono transition-all"
                     />
                 </div>
                 <button 
-                  type="submit" 
-                  disabled={loading}
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                    onClick={handleTrack}
+                    disabled={loading}
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
                 >
-                   {loading ? (
-                     <> <span className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span> Searching... </>
-                   ) : (
-                     <> <FiSearch className="text-xl" /> Track Order </>
-                   )}
+                    {loading ? (
+                       <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                    ) : (
+                       <>Track Now <FiChevronRight /></>
+                    )}
                 </button>
-            </form>
+            </div>
         </div>
+      </div>
 
-        {/* 3. TRACKING RESULT */}
-        {orderDetails && (
-            <div className="mt-8 bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in-up relative">
+      {/* 2. ORDER DETAILS SECTION */}
+      <div className="max-w-4xl mx-auto px-4 mt-20">
+        
+        {/* LOADING SKELETON (Optional) */}
+        {loading && (
+           <div className="animate-pulse space-y-4">
+              <div className="h-40 bg-gray-200 rounded-2xl"></div>
+              <div className="h-60 bg-gray-200 rounded-2xl"></div>
+           </div>
+        )}
+
+        {/* RESULT CARD */}
+        {orderDetails && !loading && (
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden animate-fade-in-up">
                 
-                {/* Confetti for Delivered Status (CSS Trick) */}
-                {orderDetails.status === 'Delivered' && (
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 animate-pulse"></div>
-                )}
-
                 {/* Header Info */}
-                <div className="bg-gray-50/50 p-6 md:p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between md:items-start gap-6">
-                    <div className="space-y-2">
-                        <h2 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
-                            {orderDetails.product}
-                        </h2>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                            <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-gray-200">
-                                Order ID: <span className="font-mono text-gray-800 font-bold">#{orderDetails.id.substring(0, 10)}...</span>
-                                <button onClick={() => {navigator.clipboard.writeText(orderDetails.id); toast.success("Copied!")}} className="ml-1 text-purple-600 hover:text-purple-800"><FiCopy /></button>
-                            </span>
-                            <span>|</span>
-                            <span>Ordered: {orderDetails.date}</span>
-                        </div>
+                <div className="bg-gray-50/50 p-6 md:p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between gap-6">
+                    <div>
+                        <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Order ID</p>
+                        <p className="text-xl md:text-2xl font-bold text-gray-900 font-mono">#{orderDetails._id}</p>
+                        <p className="text-sm text-gray-500 flex items-center gap-2 mt-2">
+                           <FiCalendar /> Placed on: {new Date(orderDetails.createdAt).toLocaleDateString()}
+                        </p>
                     </div>
                     <div className="text-left md:text-right">
-                        <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Status</p>
-                        {orderDetails.status === 'Delivered' ? (
-                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold bg-green-100 text-green-700 border border-green-200">
-                                <FiCheckCircle /> Delivered
-                            </span>
-                        ) : (
-                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold bg-yellow-100 text-yellow-700 border border-yellow-200">
-                                <FiTruck /> {orderDetails.status}
-                            </span>
-                        )}
+                        <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Amount</p>
+                        <p className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                           ₹{orderDetails.amount?.toLocaleString()}
+                        </p>
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold mt-2 ${
+                            orderDetails.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                           <FiClock /> {orderDetails.status}
+                        </span>
                     </div>
                 </div>
 
-                {/* TIMELINE VISUALIZATION */}
+                {/* PROGRESS TRACKER (The "Premium" Look) */}
                 <div className="p-8 md:p-12 relative">
-                    {/* Desktop Horizontal Line */}
-                    <div className="hidden md:block absolute top-16 left-12 right-12 h-1 bg-gray-200 rounded-full -z-0">
-                        {/* Progress Fill */}
+                    <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-8 md:gap-0">
+                        
+                        {/* Connecting Line (Desktop) */}
+                        <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 -z-0 rounded-full"></div>
                         <div 
-                            className="h-full bg-purple-600 rounded-full transition-all duration-1000 ease-out"
-                            style={{ 
-                                width: orderDetails.status === 'Delivered' ? '100%' : 
-                                       orderDetails.status === 'Shipped' ? '66%' : 
-                                       orderDetails.status === 'Processing' ? '33%' : '0%' 
-                            }}
+                            className="hidden md:block absolute top-1/2 left-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500 -translate-y-1/2 -z-0 rounded-full transition-all duration-1000 ease-out"
+                            style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : '100%' }}
                         ></div>
-                    </div>
 
-                    {/* Mobile Vertical Line */}
-                    <div className="md:hidden absolute left-12 top-12 bottom-12 w-1 bg-gray-200 rounded-full -z-0"></div>
+                        {/* Steps */}
+                        {['Processing', 'Shipped', 'Delivered'].map((step, index) => {
+                             const stepNum = index + 1;
+                             const isCompleted = stepNum <= currentStep;
+                             const isCurrent = stepNum === currentStep;
 
-                    <div className="flex flex-col md:flex-row justify-between gap-8 md:gap-0 relative z-10">
-                        {steps.map((step, index) => {
-                            const isActive = getStepStatus(step.status);
-                            const isCompleted = getStepStatus(step.status) && orderDetails.status !== step.status; // Past step
-                            const isCurrent = orderDetails.status === step.status;
-
-                            return (
-                                <div key={index} className="flex md:flex-col items-center gap-6 md:gap-4 md:w-1/4">
+                             return (
+                                <div key={step} className="relative z-10 flex md:flex-col items-center gap-4 md:gap-4 w-full md:w-auto">
                                     {/* Icon Circle */}
-                                    <div 
-                                        className={`
-                                            w-16 h-16 rounded-full flex items-center justify-center text-2xl border-4 transition-all duration-500 shadow-sm
-                                            ${isActive ? 'bg-purple-600 border-purple-200 text-white scale-110 shadow-purple-200' : 'bg-white border-gray-200 text-gray-300'}
-                                        `}
-                                    >
-                                        {step.icon}
+                                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-xl shadow-lg transition-all duration-500 ${
+                                        isCompleted 
+                                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white scale-110 ring-4 ring-purple-50' 
+                                          : 'bg-white border-2 border-gray-200 text-gray-300'
+                                    }`}>
+                                        {step === 'Processing' && <FiPackage />}
+                                        {step === 'Shipped' && <FiTruck />}
+                                        {step === 'Delivered' && <FiCheckCircle />}
                                     </div>
-                                    
+
                                     {/* Text */}
                                     <div className="md:text-center">
-                                        <h4 className={`font-bold text-base ${isActive ? 'text-gray-900' : 'text-gray-400'}`}>
-                                            {step.label}
-                                        </h4>
-                                        {isCurrent && (
-                                            <p className="text-xs text-purple-600 font-bold animate-pulse mt-1">In Progress</p>
-                                        )}
-                                        {isCompleted && (
-                                            <p className="text-xs text-green-600 font-bold mt-1">Completed</p>
-                                        )}
+                                        <p className={`font-bold text-base ${isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>{step}</p>
+                                        <p className="text-xs text-gray-400">
+                                            {isCurrent ? 'Current Status' : isCompleted ? 'Completed' : 'Pending'}
+                                        </p>
                                     </div>
                                 </div>
-                            );
+                             )
                         })}
                     </div>
                 </div>
 
-                {/* HELP SECTION */}
-                <div className="bg-gray-50 p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-gray-100">
-                    <div className="flex items-center gap-3 text-gray-600">
-                        <FiAlertCircle className="text-xl text-purple-600" />
-                        <span className="text-sm font-medium">Issue with your order?</span>
+                {/* ITEMS LIST (Grid Layout) */}
+                <div className="bg-gray-50 p-6 md:p-8 border-t border-gray-100">
+                    <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2 text-lg">
+                        <FiShoppingBag className="text-purple-600" /> Order Items
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {orderDetails.cartItems?.map((item, index) => (
+                            <div key={index} className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
+                                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center p-2 flex-shrink-0">
+                                   <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-gray-800 line-clamp-1">{item.name}</p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                       <span className="font-bold text-purple-600">₹{item.price}</span> 
+                                       <span className="text-gray-400 mx-2">|</span> 
+                                       Qty: {item.quantity}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                    <Link 
-                        to="/contact" 
-                        className="text-purple-700 font-bold hover:bg-purple-50 px-4 py-2 rounded-lg transition text-sm border border-transparent hover:border-purple-200"
-                    >
-                        Contact Support →
-                    </Link>
+                </div>
+                
+                {/* FOOTER ACTIONS */}
+                <div className="p-6 bg-white border-t border-gray-100 flex justify-center">
+                   <Link to="/contact" className="text-gray-500 hover:text-purple-600 transition flex items-center gap-2 text-sm font-medium">
+                      <FiAlertCircle /> Report an issue with this order
+                   </Link>
                 </div>
 
+            </div>
+        )}
+
+        {/* EMPTY STATE / INSTRUCTIONS */}
+        {!orderDetails && !loading && (
+            <div className="text-center py-12 opacity-50">
+               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 text-4xl">
+                  <FiMapPin />
+               </div>
+               <p className="text-gray-400">Enter your Order ID above to see details.</p>
             </div>
         )}
 

@@ -98,13 +98,15 @@ const Navbar = ({ search, setSearch, cartItems, wishlistItems, isLoggedIn, setIs
             <Link to="/about" className={getLinkClass("/about")}>About</Link>
             <Link to="/contact" className={getLinkClass("/contact")}>Contact</Link>
             <Link to="/track-order" className={getLinkClass("/track-order")}>Track Order</Link>
+            <Link to="/compare" className={getLinkClass("/compare")}>Compare</Link>
+            <Link to="/repair" className={getLinkClass("/repair")}>Service</Link>  
           </div>
 
           {/* 3. RIGHT ICONS & SEARCH */}
           <div className="flex items-center gap-4 md:gap-6">
             
             {/* Search Bar (Expandable) */}
-            <div className="relative hidden md:block group">
+            <div className="relative hidden md:block group ml-[10px]">
               <input
                 type="text"
                 placeholder="Search..."
@@ -213,13 +215,13 @@ const Navbar = ({ search, setSearch, cartItems, wishlistItems, isLoggedIn, setIs
         <div className="px-4 pt-4 pb-6 space-y-3">
           
           {/* Mobile Search */}
-          <div className="relative mb-4">
+          <div className="relative mb-4 ">
              <input
                 type="text"
                 placeholder="Search products..."
                 value={search}
                 onChange={handleSearchInput}
-                className="w-full bg-gray-800 text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 border border-gray-700"
+                className="w-full bg-gray-800 text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 border  border-gray-700"
               />
               <FiSearch className="absolute left-3 top-3.5 text-gray-400" />
           </div>
@@ -229,6 +231,8 @@ const Navbar = ({ search, setSearch, cartItems, wishlistItems, isLoggedIn, setIs
           <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-300 hover:text-white hover:bg-white/5 px-3 rounded-lg transition">About</Link>
           <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-300 hover:text-white hover:bg-white/5 px-3 rounded-lg transition">Contact</Link>
           <Link to="/track-order" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-300 hover:text-white hover:bg-white/5 px-3 rounded-lg transition">Track Order</Link>
+          <Link to="/compare" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-300 hover:text-white hover:bg-white/5 px-3 rounded-lg transition">Compare</Link>
+           <Link to="/repair" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-300 hover:text-white hover:bg-white/5 px-3 rounded-lg transition">Service</Link>
           
           {user ? (
             <div className="border-t border-gray-700 pt-4 mt-4">
