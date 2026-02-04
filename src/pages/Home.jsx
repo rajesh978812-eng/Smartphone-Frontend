@@ -1,19 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios'; // API கால் செய்வதற்கு
 import ImageSlider from '../components/ImageSlider';
 import ProductCard from '../components/ProductCard';
-import { fetchProducts } from '../services/api';
+import SmartFinder from '../components/SmartFinder'; 
+import { FaRobot } from 'react-icons/fa'; 
 
 const Home = ({ addToCart, toggleWishlist, wishlistItems }) => {
+  // --- STATES ---
   const [latestProducts, setLatestProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // SmartFinder-க்காக
   const [loading, setLoading] = useState(true);
+  const [isFinderOpen, setIsFinderOpen] = useState(false);
 
-  // Load Products
+  // --- LOAD PRODUCTS ---
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await fetchProducts();
-        setLatestProducts(res.data.products.slice(0, 4));
+        // உங்கள் Render Backend URL
+        const { data } = await axios.get('https://smartphone-backend-rgjm.onrender.com/api/products');
+        
+        setAllProducts(data.products); // SmartFinder-க்கு அனுப்ப
+        setLatestProducts(data.products.slice(0, 4)); // Trending-க்கு அனுப்ப
         setLoading(false);
       } catch (error) {
         console.error("Failed to load products", error);
@@ -24,29 +32,49 @@ const Home = ({ addToCart, toggleWishlist, wishlistItems }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-10 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 pb-10 overflow-x-hidden w-full">
       
-      {/* 1. HERO SLIDER */}
-      <ImageSlider />
+      {/* 1. HERO SLIDER (Mobile Fix Applied) */}
+      <div className="w-full relative overflow-hidden">
+         <ImageSlider />
+      </div>
+
+      {/* --- AI FINDER BUTTON (Premium UI) --- */}
+      <div className="my-8 flex justify-center px-4 relative z-20">
+          <button 
+              onClick={() => setIsFinderOpen(true)}
+              className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 md:px-10 py-4 rounded-full font-bold text-base md:text-lg shadow-lg hover:shadow-purple-500/50 transform hover:-translate-y-1 transition-all animate-pulse w-full md:w-auto justify-center"
+          >
+              <FaRobot size={24} className="animate-bounce" />
+              <span>Find My Perfect Phone (AI)</span>
+          </button>
+      </div>
+
+      {/* --- AI FINDER MODAL --- */}
+      <SmartFinder 
+          isOpen={isFinderOpen} 
+          onClose={() => setIsFinderOpen(false)} 
+          products={allProducts} 
+      />
 
       {/* 2. FEATURES SECTION */}
-      <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-30 mb-12">
-        <div className="bg-white rounded-xl shadow-lg p-6 grid grid-cols-2 md:grid-cols-4 gap-6 border border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 relative z-30 mb-16">
+        <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6 border border-white/50">
           
-          <div className="flex items-center gap-4 justify-center md:justify-start">
-             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-2xl">🚚</div>
+          <div className="flex flex-col md:flex-row items-center gap-3 text-center md:text-left">
+             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-2xl shadow-sm">🚚</div>
              <div><h4 className="font-bold text-gray-800 text-sm">Free Shipping</h4><p className="text-xs text-gray-500">On orders over ₹499</p></div>
           </div>
-          <div className="flex items-center gap-4 justify-center md:justify-start">
-             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-2xl">🛡️</div>
+          <div className="flex flex-col md:flex-row items-center gap-3 text-center md:text-left">
+             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-2xl shadow-sm">🛡️</div>
              <div><h4 className="font-bold text-gray-800 text-sm">Official Warranty</h4><p className="text-xs text-gray-500">100% Genuine</p></div>
           </div>
-          <div className="flex items-center gap-4 justify-center md:justify-start">
-             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl">💳</div>
+          <div className="flex flex-col md:flex-row items-center gap-3 text-center md:text-left">
+             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl shadow-sm">💳</div>
              <div><h4 className="font-bold text-gray-800 text-sm">Secure Payment</h4><p className="text-xs text-gray-500">UPI, Card & Netbanking</p></div>
           </div>
-          <div className="flex items-center gap-4 justify-center md:justify-start">
-             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-2xl">🎧</div>
+          <div className="flex flex-col md:flex-row items-center gap-3 text-center md:text-left">
+             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-2xl shadow-sm">🎧</div>
              <div><h4 className="font-bold text-gray-800 text-sm">24/7 Support</h4><p className="text-xs text-gray-500">Friendly Support</p></div>
           </div>
 
@@ -95,17 +123,17 @@ const Home = ({ addToCart, toggleWishlist, wishlistItems }) => {
         </div>
       </div>
 
-      {/* 4. PROMO BANNER (Final Fixes) */}
+      {/* 4. PROMO BANNER (iPhone 15 Pro) */}
       <div className="mt-16 bg-[#1a1c2e] text-white py-12 px-4 relative overflow-hidden">
          
-         {/* Background Blur - Added pointer-events-none to prevent blocking clicks */}
+         {/* Background Blur */}
          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-purple-600 to-pink-600 rounded-full blur-[120px] opacity-20 pointer-events-none z-0"></div>
 
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10 relative z-10">
             
             {/* Left Content */}
             <div className="md:w-1/2 text-center md:text-left space-y-6 relative z-30">
-               <span className="bg-purple-600 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm inline-block">
+               <span className="bg-purple-600 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm inline-block animate-pulse">
                  Limited Offer
                </span>
                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
@@ -118,7 +146,7 @@ const Home = ({ addToCart, toggleWishlist, wishlistItems }) => {
                   Titanium design, A17 Pro chip, and the most powerful camera system yet. Experience the future today.
                </p>
                
-               {/* BUTTON FIX: z-50 and relative to ensure it's on top */}
+               {/* BUTTON FIX: z-50 to ensure clickability */}
                <div className="relative z-50 pt-4">
                  <Link 
                    to="/products" 
@@ -129,13 +157,11 @@ const Home = ({ addToCart, toggleWishlist, wishlistItems }) => {
                </div>
             </div>
 
-            {/* Right Image (Responsive Fix) */}
-            {/* pointer-events-none added to container to ensure it doesn't block clicks on mobile overlapping areas */}
+            {/* Right Image (Image Logic Preserved) */}
             <div className="md:w-1/2 flex justify-center relative z-20 mt-8 md:mt-0 pointer-events-none">
                <img 
                  src="/iphone 15 pro.jpg" 
                  alt="iPhone 15 Pro" 
-                 // Responsive Classes: w-3/4 on mobile ensures it's not too big. md:w-full lets it grow on desktop.
                  className="w-3/4 md:w-full max-w-sm md:max-w-md h-auto object-contain drop-shadow-2xl animate-float pointer-events-auto"
                  onError={(e) => { e.target.style.display='none' }} 
                />
