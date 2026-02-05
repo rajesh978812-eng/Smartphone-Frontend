@@ -44,7 +44,7 @@ const Repair = () => {
                 <ServiceCard icon={<FiSmartphone />} title="Screen Replacement" price="₹1,200+" />
                 <ServiceCard icon={<FiBattery />} title="Battery Issues" price="₹800+" />
                 <ServiceCard icon={<FiDroplet />} title="Water Damage" price="₹1,500+" />
-                <ServiceCard icon={<FiCpu />} title="Software/Motherboard" price="₹500+" />
+                <ServiceCard icon={<FiCpu />} title="Software/ Motherboard" price="₹500+" />
             </div>
 
             {/* 3. BOOKING FORM */}

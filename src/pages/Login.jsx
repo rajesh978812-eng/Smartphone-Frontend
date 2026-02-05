@@ -124,7 +124,7 @@ const Login = ({ setIsLoggedIn }) => {
             </div>
             
             <div className="flex justify-end mt-1">
-              <a href="#" className="text-xs font-semibold text-purple-600 hover:text-purple-800 hover:underline">
+              <a href="/forgot-password" className="text-xs font-semibold text-purple-600 hover:text-purple-800 hover:underline">
                 Forgot Password?
               </a>
             </div>

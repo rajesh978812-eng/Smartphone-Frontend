@@ -2,15 +2,21 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createOrder } from "../services/api"; 
 import { toast } from 'react-hot-toast';
-import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight, FiCheckCircle, FiCreditCard, FiTruck, FiShield, FiGift } from "react-icons/fi";
+import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight, FiCheckCircle, FiCreditCard, FiTruck, FiShield, FiGift, FiLock } from "react-icons/fi";
 import { FaGooglePay, FaAmazonPay, FaCcVisa, FaCcMastercard } from "react-icons/fa";
 
 const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  
+  // Steps: 'method' -> 'card-details' -> 'otp' -> 'processing'
   const [paymentStep, setPaymentStep] = useState("method");
   const [isProcessing, setIsProcessing] = useState(false);
   const [couponCode, setCouponCode] = useState("");
+
+  // Form States for Fake Payment
+  const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "" });
+  const [otp, setOtp] = useState("");
 
   const navigate = useNavigate();
 
@@ -24,9 +30,33 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
   const handlePaymentClick = () => {
     setShowPaymentModal(true);
     setPaymentStep("method");
+    setCardDetails({ number: "", expiry: "", cvv: "" }); // Reset form
+    setOtp("");
   };
 
-  // --- PROCESS PAYMENT & CREATE ORDER ---
+  // --- NEW: HANDLE METHOD SELECTION ---
+  const handleMethodSelect = (method) => {
+    if (method === 'card') {
+      setPaymentStep('card-details'); // Go to Card Form
+    } else {
+      processPayment(); // UPI & COD directly process (or add steps if needed)
+    }
+  };
+
+  // --- NEW: HANDLE CARD FORM SUBMIT ---
+  const handleCardSubmit = (e) => {
+    e.preventDefault();
+    // In a real app, you validate here. For demo, we move to OTP.
+    setPaymentStep('otp');
+  };
+
+  // --- NEW: HANDLE OTP SUBMIT ---
+  const handleOtpSubmit = (e) => {
+    e.preventDefault();
+    processPayment(); // Trigger the processing animation
+  };
+
+  // --- PROCESS PAYMENT & CREATE ORDER (EXISTING LOGIC) ---
   const processPayment = async () => {
     setPaymentStep("processing");
     setIsProcessing(true);
@@ -35,14 +65,14 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
       // Backend API Call
       await createOrder({ cartItems }); 
 
-      // Simulate Payment Delay (2 Seconds)
+      // Simulate Payment Delay (3 Seconds for realism)
       setTimeout(() => {
         setPaymentStep("method");
         setShowPaymentModal(false);
         setShowSuccess(true);
         setCartItems([]); // Clear Cart
         toast.success("Order Placed Successfully! 🎉");
-      }, 2000);
+      }, 3000);
 
     } catch (error) {
       console.error("Order Failed", error);
@@ -272,7 +302,7 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
         </div>
       </div>
 
-      {/* 4. PAYMENT MODAL (Modern) */}
+      {/* 4. PAYMENT MODAL (UPDATED WITH FAKE LOGIC) */}
       {showPaymentModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
@@ -288,12 +318,13 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
               </div>
 
               <div className="p-6">
-                {paymentStep === "method" ? (
+                {/* STEP 1: SELECT METHOD */}
+                {paymentStep === "method" && (
                   <>
                     <p className="text-gray-500 text-sm mb-4">Select a payment method to complete your purchase of <span className="font-bold text-gray-900">₹{finalAmount.toLocaleString()}</span></p>
                     
                     <div className="space-y-3">
-                       <button onClick={processPayment} className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-purple-600 hover:bg-purple-50 transition group">
+                       <button onClick={() => handleMethodSelect('upi')} className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-purple-600 hover:bg-purple-50 transition group">
                           <div className="flex items-center gap-3">
                              <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><FaGooglePay size={20} /></div>
                              <span className="font-bold text-gray-700 group-hover:text-purple-700">UPI / Google Pay</span>
@@ -301,7 +332,7 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
                           <span className="text-gray-300 group-hover:text-purple-600">➔</span>
                        </button>
 
-                       <button onClick={processPayment} className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-purple-600 hover:bg-purple-50 transition group">
+                       <button onClick={() => handleMethodSelect('card')} className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-purple-600 hover:bg-purple-50 transition group">
                           <div className="flex items-center gap-3">
                              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><FiCreditCard size={20} /></div>
                              <span className="font-bold text-gray-700 group-hover:text-purple-700">Credit / Debit Card</span>
@@ -309,7 +340,7 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
                           <span className="text-gray-300 group-hover:text-purple-600">➔</span>
                        </button>
 
-                       <button onClick={processPayment} className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-purple-600 hover:bg-purple-50 transition group">
+                       <button onClick={() => handleMethodSelect('cod')} className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-purple-600 hover:bg-purple-50 transition group">
                           <div className="flex items-center gap-3">
                              <div className="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center"><FiTruck size={20} /></div>
                              <div>
@@ -321,8 +352,83 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
                        </button>
                     </div>
                   </>
-                ) : (
-                  /* PROCESSING STATE */
+                )}
+
+                {/* STEP 2: ENTER CARD DETAILS (Fake Logic) */}
+                {paymentStep === "card-details" && (
+                   <form onSubmit={handleCardSubmit} className="space-y-4 animate-fade-in">
+                      <div>
+                         <label className="text-xs font-bold text-gray-500 uppercase">Card Number</label>
+                         <div className="relative">
+                            <input 
+                               type="text" 
+                               placeholder="4111 1111 1111 1111" 
+                               className="w-full p-3 pl-10 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none font-mono tracking-wider" 
+                               value={cardDetails.number}
+                               onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
+                               required 
+                            />
+                            <FiCreditCard className="absolute left-3 top-3.5 text-gray-400" />
+                         </div>
+                      </div>
+                      <div className="flex gap-4">
+                         <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-500 uppercase">Expiry</label>
+                            <input 
+                               type="text" 
+                               placeholder="12/28" 
+                               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-center" 
+                               required 
+                            />
+                         </div>
+                         <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-500 uppercase">CVV</label>
+                            <input 
+                               type="password" 
+                               placeholder="123" 
+                               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-center" 
+                               required 
+                            />
+                         </div>
+                      </div>
+                      <button type="submit" className="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition shadow-lg mt-2">
+                         Pay ₹{finalAmount.toLocaleString()}
+                      </button>
+                      <button type="button" onClick={() => setPaymentStep("method")} className="w-full text-gray-500 text-sm py-2 hover:text-gray-800">
+                         Cancel
+                      </button>
+                   </form>
+                )}
+
+                {/* STEP 3: OTP VERIFICATION (Fake Logic) */}
+                {paymentStep === "otp" && (
+                   <form onSubmit={handleOtpSubmit} className="space-y-6 animate-fade-in text-center">
+                      <div className="bg-purple-50 p-4 rounded-xl">
+                         <h4 className="font-bold text-purple-900 mb-1">Enter OTP</h4>
+                         <p className="text-xs text-purple-600">Sent to your registered mobile number</p>
+                      </div>
+                      
+                      <div className="flex justify-center">
+                         <input 
+                            type="text" 
+                            placeholder="123456" 
+                            maxLength={6}
+                            className="w-40 p-3 text-2xl text-center border-2 border-purple-200 rounded-lg focus:border-purple-600 focus:outline-none tracking-[0.5em] font-bold" 
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value)}
+                            required 
+                         />
+                      </div>
+
+                      <button type="submit" className="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition shadow-lg flex items-center justify-center gap-2">
+                         <FiLock /> Verify & Pay
+                      </button>
+                      <p className="text-[10px] text-gray-400">Please do not refresh the page</p>
+                   </form>
+                )}
+
+                {/* STEP 4: PROCESSING STATE */}
+                {paymentStep === "processing" && (
                   <div className="flex flex-col items-center justify-center py-8">
                      <div className="relative w-20 h-20 mb-6">
                         <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-100 rounded-full"></div>

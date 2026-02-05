@@ -14,12 +14,13 @@ import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from './pages/ForgotPassword'; 
 import MyOrders from "./pages/MyOrders"; 
 import AdminDashboard from "./pages/AdminDashboard";
 import TrackOrder from "./pages/TrackOrder";
 import Profile from "./pages/Profile";
 import Compare from "./pages/Compare";
-import Repair from "./pages/Repair"; 
+import Repair from "./pages/Repair";
 
 const App = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -132,7 +133,9 @@ const App = () => {
             />
             <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/my-orders" element={<MyOrders />} />
+            
 
             {/* --- ADMIN ROUTE --- */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
