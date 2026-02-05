@@ -118,7 +118,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Location</p>
-                  <p className="text-white font-medium">123,  Muthaliyar Street, <br/>  Thurgalaya Road, Thiruvar - 610001.</p>
+                  <p className="text-white font-medium">123,  Muthaliyar Street, <br/>  Thurgalaya Road, Thiruvarur - 610001.</p>
                 </div>
               </div>
 
@@ -129,7 +129,7 @@ const Footer = () => {
         {/* Copyright Line */}
         <div className="border-t border-gray-800 mt-12 pt-8 text-center">
           <p className="text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} <span className="text-purple-400 font-bold">Smartphone Store</span>. All rights reserved. 
+            &copy; {new Date().getFullYear()} <span className="text-purple-400 font-bold">SwipeKart</span>. All rights reserved. 
             
           </p>
         </div>

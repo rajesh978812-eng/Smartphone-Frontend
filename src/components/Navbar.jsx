@@ -82,14 +82,43 @@ const Navbar = ({ search, setSearch, cartItems, wishlistItems, isLoggedIn, setIs
         <div className="flex justify-between items-center">
 
           {/* 1. LOGO (Gradient Text) */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:rotate-12 transition-transform">
-              S
-            </div>
-            <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent tracking-wide">
-              Smartphone Store
-            </span>
-          </Link>
+          {/* --- PREMIUM SWIPEKART LOGO START --- */}
+<Link to="/" className="flex items-center gap-3 group">
+  
+  {/* Logo Icon Container */}
+  <div className="relative w-11 h-11">
+    <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl rotate-6 group-hover:rotate-12 transition-transform duration-300 opacity-80 blur-sm"></div>
+    <div className="relative w-full h-full bg-[#24263a] border border-gray-700 rounded-xl flex items-center justify-center text-white overflow-hidden shadow-2xl">
+       
+       {/* Animated Swipe Icon */}
+       <div className="relative z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-purple-400 group-hover:text-white transition-colors">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+            <path d="M12 18h.01"></path>
+            {/* Swipe Arrow Animation */}
+            <path d="M15 10l-3-3m0 0l-3 3m3-3v8" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0 text-white" /> 
+          </svg>
+       </div>
+       
+       {/* Shine Effect */}
+       <div className="absolute top-0 -left-10 w-8 h-full bg-white/10 skew-x-[20deg] group-hover:translate-x-24 transition-transform duration-700 ease-in-out"></div>
+    </div>
+  </div>
+
+  {/* Logo Text */}
+  <div className="flex flex-col">
+    <h1 className="text-2xl font-black tracking-tight text-white leading-none font-sans">
+      Swipe<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 group-hover:text-purple-300 transition-colors">Kart</span>
+      <span className="text-purple-500 text-3xl leading-none inline-block transform group-hover:-translate-y-1 group-hover:rotate-12 transition-all duration-300">.</span>
+    </h1>
+    <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em] uppercase group-hover:text-purple-300 transition-colors">
+      Smartphone Store
+    </span>
+  </div>
+
+</Link>
+{/* --- PREMIUM SWIPEKART LOGO END --- */}
+
 
           {/* 2. DESKTOP NAVIGATION */}
           <div className="hidden md:flex items-center space-x-8">

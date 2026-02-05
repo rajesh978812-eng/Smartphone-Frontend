@@ -13,7 +13,7 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
   const [paymentStep, setPaymentStep] = useState("method");
   const [isProcessing, setIsProcessing] = useState(false);
   const [couponCode, setCouponCode] = useState("");
-
+  const [couponDiscount, setCouponDiscount] = useState(0);
   // Form States for Fake Payment
   const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "" });
   const [otp, setOtp] = useState("");
@@ -25,8 +25,28 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
   const totalMRP = cartItems.reduce((sum, item) => sum + (item.mrp || item.price) * item.quantity, 0);
   const totalDiscount = totalMRP - totalPrice;
   const shippingFee = totalPrice > 500 ? 0 : 49;
-  const finalAmount = totalPrice + shippingFee;
-
+  const finalAmount = totalPrice + shippingFee - couponDiscount;
+  
+  // --- COUPON LOGIC ---
+const applyCoupon = () => {
+  if (!couponCode) {
+      toast.error("Please enter a coupon code");
+      return;
+  }
+  if (couponCode.toUpperCase() === "OFFER500") {
+      setCouponDiscount(500);
+      toast.success("Coupon Applied! ₹500 Saved 🎉");
+  } 
+  else if (couponCode.toUpperCase() === "DIWALI20") {
+      const discount = Math.round(totalPrice * 0.20);
+      setCouponDiscount(discount);
+      toast.success(`Coupon Applied! ₹${discount} Saved 🎉`);
+  } 
+  else {
+      toast.error("Invalid Coupon Code ❌");
+      setCouponDiscount(0);
+  }
+};
   const handlePaymentClick = () => {
     setShowPaymentModal(true);
     setPaymentStep("method");
@@ -255,7 +275,12 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
                   <span>Shipping Fee</span>
                   <span>{shippingFee === 0 ? <span className="text-green-600">Free</span> : `₹${shippingFee}`}</span>
                 </div>
-                
+                {couponDiscount > 0 && (
+                 <div className="flex justify-between text-purple-600 font-bold animate-pulse">
+                   <span>Coupon Applied</span>
+                          <span>- ₹{couponDiscount.toLocaleString()}</span>
+                 </div>
+                  )}
                 <div className="border-t border-dashed border-gray-200 my-4 pt-4">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-900">Total Amount</span>
@@ -279,7 +304,7 @@ const Cart = ({ cartItems, updateQuantity, removeFromCart, setCartItems }) => {
                       onChange={(e) => setCouponCode(e.target.value)}
                       className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500"
                     />
-                    <button className="bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-black transition">Apply</button>
+                    <button  onClick={applyCoupon} className="bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-black transition">Apply</button>
                  </div>
               </div>
 

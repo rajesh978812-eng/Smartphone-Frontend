@@ -94,7 +94,7 @@ const Contact = () => {
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500 font-bold uppercase">Visit Us</p>
-                                <p className="text-gray-800 font-medium">123, Muthaliyar Street, <br/>  Thurgalaya Road, Thiruvar - 610001.</p>
+                                <p className="text-gray-800 font-medium">123, Muthaliyar Street, <br/>  Thurgalaya Road, Thiruvarur - 610001.</p>
                             </div>
                         </div>
                     </div>
