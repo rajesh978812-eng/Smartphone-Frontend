@@ -83,7 +83,7 @@ const Navbar = ({ search, setSearch, cartItems, wishlistItems, isLoggedIn, setIs
 
           {/* 1. LOGO (Gradient Text) */}
           {/* --- PREMIUM SWIPEKART LOGO START --- */}
-<Link to="/" className="flex items-center gap-3 group">
+<Link to="/" className="flex items-center gap-2 group">
   
   {/* Logo Icon Container */}
   <div className="relative w-11 h-11">
