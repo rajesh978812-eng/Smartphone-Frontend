@@ -79,7 +79,7 @@ const Navbar = ({ search, setSearch, cartItems, wishlistItems, isLoggedIn, setIs
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-4">
 
           {/* 1. LOGO (Gradient Text) */}
           {/* --- PREMIUM SWIPEKART LOGO START --- */}
