@@ -109,11 +109,7 @@ const Navbar = ({ search, setSearch, cartItems, wishlistItems, isLoggedIn, setIs
   <div className="flex flex-col">
     <h1 className="text-2xl font-black tracking-tight text-white leading-none font-sans">
       Swipe<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 group-hover:text-purple-300 transition-colors">Kart</span>
-      <span className="text-purple-500 text-3xl leading-none inline-block transform group-hover:-translate-y-1 group-hover:rotate-12 transition-all duration-300">.</span>
     </h1>
-    <span className="text-[10px] font-bold text-gray-400 tracking-[0.2em] uppercase group-hover:text-purple-300 transition-colors">
-      Smartphone Store
-    </span>
   </div>
 
 </Link>
