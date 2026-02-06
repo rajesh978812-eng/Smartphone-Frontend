@@ -1,167 +1,148 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import API from '../services/api'; // நாம் உருவாக்கிய API File
-import { toast } from 'react-hot-toast';
-import { FiSearch, FiPackage, FiTruck, FiMapPin, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
+import { FiHeart, FiShoppingCart, FiStar } from "react-icons/fi";
+import { FaBolt } from "react-icons/fa";
 
-const TrackOrder = () => {
-  const [orderId, setOrderId] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [orderDetails, setOrderDetails] = useState(null);
+const ProductCard = ({ product, wishlistItems, toggleWishlist, addToCart }) => {
+  const { 
+    _id, image, name, ram, storage, display, mrp, price, 
+    ratings, numOfReviews, brand 
+  } = product;
 
-  const handleTrack = async (e) => {
-    e.preventDefault();
-    if (!orderId) return toast.error("Please enter Order ID");
-
-    // Order ID-ல் உள்ள # குறியீட்டை நீக்குதல்
-    const cleanId = orderId.replace('#', '').trim();
-    
-    // MongoDB ID சரியாக 24 எழுத்துகள் உள்ளதா என சரிபார்த்தல் (Optional but Good)
-    if (cleanId.length !== 24) {
-        return toast.error("Invalid Order ID format. Check My Orders page.");
-    }
-
-    setLoading(true);
-    setOrderDetails(null);
-
-    try {
-        // --- REAL API CALL ---
-        // api.js தானாகவே Token-ஐ எடுத்துக்கொள்ளும்
-        const { data } = await API.get(`/order/${cleanId}`);
-
-        if (data.success) {
-            setOrderDetails(data.order);
-            toast.success("Order Found! 📦");
-        } else {
-            toast.error("Order not found");
-        }
-
-    } catch (error) {
-        console.error("Tracking Error:", error);
-        // Demo Code-ஐ நீக்கிவிட்டோம். இப்போது உண்மையான Error வரும்.
-        toast.error(error.response?.data?.message || "Order not found with this ID");
-    } finally {
-        setLoading(false);
-    }
+  // --- IMAGE HELPER ---
+  const getImageUrl = (img) => {
+    if (!img) return "https://via.placeholder.com/300?text=No+Image";
+    if (img.startsWith("http")) return img;
+    return img.startsWith("/") ? img : `/${img}`; 
   };
 
-  // --- UI RENDERING HELPERS ---
-  // Status Bar Logic
-  const getStatusStep = (status) => {
-      if (status === 'Processing') return 1;
-      if (status === 'Shipped') return 2;
-      if (status === 'Delivered') return 3;
-      return 0;
+  // Wishlist Check
+  const isWishlisted = wishlistItems?.some((item) => item._id === _id);
+  
+  // Discount Calculation
+  const discount = mrp ? Math.round(((mrp - price) / mrp) * 100) : 0;
+
+  // Rating Stars Helper (Amazon Style)
+  const renderStars = (ratingValue) => {
+    return [...Array(5)].map((_, i) => (
+      <FiStar 
+        key={i} 
+        className={`${i < Math.round(ratingValue) ? "fill-[#ffa41c] text-[#ffa41c]" : "fill-gray-200 text-gray-200"}`} 
+        size={14}
+      />
+    ));
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 font-sans">
-      <div className="max-w-3xl mx-auto">
+    <div className='group relative bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1'>
+      
+      {/* 1. PRODUCT IMAGE AREA */}
+      <div className="relative w-full bg-gray-50 p-4 flex items-center justify-center overflow-hidden h-[220px] md:h-[260px]">
         
-        {/* HEADER */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Track Your Order</h1>
-          <p className="text-gray-500">Enter your Order ID from your confirmation email or My Orders page.</p>
+        {/* Badges */}
+        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+            {discount >= 20 && (
+                <span className="bg-red-500 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1">
+                   <FaBolt size={10} /> {discount}% OFF
+                </span>
+            )}
+            {ratings >= 4.5 && (
+                <span className="bg-[#ffa41c] text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded shadow-sm">
+                   BESTSELLER
+                </span>
+            )}
         </div>
 
-        {/* INPUT FORM */}
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
-            <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                    <FiSearch className="absolute left-4 top-4 text-gray-400 text-xl" />
-                    <input 
-                        type="text" 
-                        placeholder="Order ID (e.g., 65c4a...)" 
-                        value={orderId}
-                        onChange={(e) => setOrderId(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition font-mono text-gray-700"
-                    />
-                </div>
-                <button 
-                    type="submit" 
-                    disabled={loading}
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-3 rounded-xl transition shadow-lg hover:shadow-purple-500/30 flex items-center justify-center gap-2 disabled:opacity-70"
-                >
-                    {loading ? "Tracking..." : "Track Order"}
-                </button>
-            </form>
-        </div>
+        {/* Wishlist Button */}
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            toggleWishlist && toggleWishlist(product);
+          }}
+          className="absolute top-3 right-3 z-20 p-2.5 bg-white rounded-full shadow-md hover:bg-red-50 transition group/btn"
+        >
+          <FiHeart 
+             size={18} 
+             className={`transition-colors ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-400 group-hover/btn:text-red-500"}`} 
+          />
+        </button>
 
-        {/* ORDER DETAILS RESULT */}
-        {orderDetails && (
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-fade-in-up">
-                
-                {/* Header Info */}
-                <div className="bg-[#1a1c2e] p-6 text-white flex justify-between items-center flex-wrap gap-4">
-                    <div>
-                        <p className="text-gray-400 text-xs uppercase font-bold mb-1">Order ID</p>
-                        <p className="font-mono text-lg font-bold">#{orderDetails._id}</p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-gray-400 text-xs uppercase font-bold mb-1">Total Amount</p>
-                        <p className="text-xl font-bold text-green-400">₹{orderDetails.amount?.toLocaleString()}</p>
-                    </div>
-                </div>
+        {/* Link to Details */}
+        <Link to={`/product/${_id}`} className="w-full h-full flex items-center justify-center">
+            <img 
+              src={getImageUrl(image)} 
+              alt={name} 
+              className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
+            />
+        </Link>
 
-                {/* Status Tracker */}
-                <div className="p-8">
-                    <div className="relative flex justify-between items-center mb-12 max-w-lg mx-auto">
-                        {/* Progress Line */}
-                        <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-0 rounded-full"></div>
-                        <div 
-                            className="absolute top-1/2 left-0 h-1 bg-green-500 -z-0 rounded-full transition-all duration-1000"
-                            style={{ width: getStatusStep(orderDetails.status) === 1 ? '0%' : getStatusStep(orderDetails.status) === 2 ? '50%' : '100%' }}
-                        ></div>
-
-                        {/* Steps */}
-                        {['Processing', 'Shipped', 'Delivered'].map((step, index) => {
-                             const currentStep = getStatusStep(orderDetails.status);
-                             const stepNum = index + 1;
-                             const isCompleted = stepNum <= currentStep;
-                             
-                             return (
-                                <div key={step} className="relative z-10 flex flex-col items-center gap-2">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-sm transition-all duration-500 ${
-                                        isCompleted ? 'bg-green-500 text-white scale-110' : 'bg-white border-2 border-gray-200 text-gray-400'
-                                    }`}>
-                                        {step === 'Processing' && <FiPackage />}
-                                        {step === 'Shipped' && <FiTruck />}
-                                        {step === 'Delivered' && <FiCheckCircle />}
-                                    </div>
-                                    <p className={`text-xs font-bold ${isCompleted ? 'text-gray-800' : 'text-gray-400'}`}>{step}</p>
-                                </div>
-                             )
-                        })}
-                    </div>
-
-                    {/* Order Items List */}
-                    <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-                        <h3 className="font-bold text-gray-700 mb-2 flex items-center gap-2">
-                            <FiPackage /> Items in this Order
-                        </h3>
-                        {orderDetails.cartItems?.map((item, index) => (
-                            <div key={index} className="flex items-center gap-4 bg-white p-3 rounded-lg border border-gray-100">
-                                <img src={item.image} alt={item.name} className="w-12 h-12 object-contain rounded-md bg-gray-100 p-1" />
-                                <div>
-                                    <p className="font-bold text-sm text-gray-800">{item.name}</p>
-                                    <p className="text-xs text-gray-500">Qty: {item.quantity} | ₹{item.price}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Footer Help */}
-                <div className="bg-gray-50 p-4 border-t border-gray-100 flex justify-center">
-                    <Link to="/contact" className="text-purple-600 text-sm font-bold flex items-center gap-2 hover:underline">
-                        <FiAlertCircle /> Need Help? Contact Support
-                    </Link>
-                </div>
-            </div>
+        {/* Quick Add to Cart Button (Visible on Hover for Desktop) */}
+        {addToCart && (
+           <button 
+             onClick={() => addToCart(product)}
+             className="absolute bottom-4 right-4 translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 bg-purple-600 text-white p-3 rounded-full shadow-lg hover:bg-purple-700 transition-all duration-300 z-20 hidden md:flex items-center justify-center"
+             title="Add to Cart"
+           >
+              <FiShoppingCart size={20} />
+           </button>
         )}
       </div>
+
+      {/* 2. PRODUCT CONTENT */}
+      <Link to={`/product/${_id}`} className="flex-1 p-4 md:p-5 flex flex-col">
+        
+        {/* Brand */}
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{brand}</p>
+        
+        {/* Name */}
+        <h3 className="font-bold text-gray-900 text-sm md:text-base leading-snug mb-2 line-clamp-2 hover:text-purple-600 transition-colors h-[40px] md:h-[48px]">
+          {name}
+        </h3>
+
+        {/* Ratings (Amazon Style) */}
+        <div className="flex items-center gap-1 mb-3">
+           <div className="flex text-[#ffa41c]">
+             {renderStars(ratings || 0)}
+           </div>
+           <span className="text-xs text-gray-400 font-medium ml-1">({numOfReviews})</span>
+        </div>
+
+        {/* Specs Pills */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+           <span className="bg-gray-100 text-gray-600 text-[10px] md:text-xs font-medium px-2 py-1 rounded">{ram}GB RAM</span>
+           <span className="bg-gray-100 text-gray-600 text-[10px] md:text-xs font-medium px-2 py-1 rounded">{storage}GB</span>
+           <span className="bg-gray-100 text-gray-600 text-[10px] md:text-xs font-medium px-2 py-1 rounded">{display}</span>
+        </div>
+
+        {/* Price Section */}
+        <div className="mt-auto pt-3 border-t border-dashed border-gray-100">
+           <div className="flex items-end gap-2">
+              <span className="text-lg md:text-xl font-bold text-gray-900">₹{price.toLocaleString()}</span>
+              {mrp > price && (
+                 <>
+                   <span className="text-xs md:text-sm text-gray-400 line-through mb-1">₹{mrp.toLocaleString()}</span>
+                   <span className="text-xs md:text-sm font-bold text-green-600 mb-1">{discount}% off</span>
+                 </>
+              )}
+           </div>
+           <p className="text-[10px] text-gray-500 mt-1 font-medium">Free Delivery by Smartphone Store</p>
+        </div>
+      </Link>
+      
+      {/* Mobile Add to Cart Button (Always Visible on Mobile) */}
+      {addToCart && (
+        <div className="md:hidden px-4 pb-4">
+           <button 
+             onClick={() => addToCart(product)}
+             className="w-full bg-purple-50 text-purple-700 font-bold py-2 rounded-lg text-sm border border-purple-100 active:bg-purple-100 flex items-center justify-center gap-2"
+           >
+             <FiShoppingCart /> Add to Cart
+           </button>
+        </div>
+      )}
+
     </div>
   );
 };
 
-export default TrackOrder;
+export default ProductCard;

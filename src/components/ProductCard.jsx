@@ -24,10 +24,15 @@ const ProductCard = ({ product, wishlistItems, toggleWishlist, addToCart }) => {
 
   // Rating Stars Helper (Amazon Style)
   const renderStars = (ratingValue) => {
+    // Ensure rating is a number
+    const safeRating = Number(ratingValue) || 0;
+    
     return [...Array(5)].map((_, i) => (
       <FiStar 
         key={i} 
-        className={`${i < Math.round(ratingValue) ? "fill-[#ffa41c] text-[#ffa41c]" : "fill-gray-200 text-gray-200"}`} 
+        // Logic: If rating is 4.5, Math.round is 5 (Full stars). 
+        // If rating is 4.2, Math.round is 4.
+        className={`${i < Math.round(safeRating) ? "fill-[#ffa41c] text-[#ffa41c]" : "fill-gray-200 text-gray-200"}`} 
         size={14}
       />
     ));
@@ -46,7 +51,8 @@ const ProductCard = ({ product, wishlistItems, toggleWishlist, addToCart }) => {
                    <FaBolt size={10} /> {discount}% OFF
                 </span>
             )}
-            {ratings >= 4.5 && (
+            {/* UPDATED LOGIC: Only show Bestseller if Rating is high AND Review count is > 30 */}
+            {ratings >= 4.5 && numOfReviews >= 30 && (
                 <span className="bg-[#ffa41c] text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded shadow-sm">
                    BESTSELLER
                 </span>
@@ -102,7 +108,7 @@ const ProductCard = ({ product, wishlistItems, toggleWishlist, addToCart }) => {
         {/* Ratings (Amazon Style) */}
         <div className="flex items-center gap-1 mb-3">
            <div className="flex text-[#ffa41c]">
-             {renderStars(ratings || 0)}
+             {renderStars(ratings)}
            </div>
            <span className="text-xs text-gray-400 font-medium ml-1">({numOfReviews})</span>
         </div>

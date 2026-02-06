@@ -11,7 +11,7 @@ const Footer = () => {
           {/* 1. Brand & About Section */}
           <div className="space-y-4">
             <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
-              Smartphone Store
+              SwipeKart
             </h3>
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
               We provide the latest smartphones and accessories at the best prices. 
@@ -107,7 +107,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Email Us</p>
-                  <p className="text-white font-medium hover:text-purple-400 transition">support@smartphonestore.com</p>
+                  <p className="text-white font-medium hover:text-purple-400 transition">support@swipekart.com</p>
                 </div>
               </div>
 
@@ -118,7 +118,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">Location</p>
-                  <p className="text-white font-medium">123,  Muthaliyar Street, <br/>  Thurgalaya Road, Thiruvarur - 610001.</p>
+                  <p className="text-white font-medium">355,  Muthaliyar Street, <br/>  Thurgalaya Road, Thiruvarur - 610001.</p>
                 </div>
               </div>
 

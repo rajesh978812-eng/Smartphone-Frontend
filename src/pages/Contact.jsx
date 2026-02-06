@@ -50,7 +50,7 @@ const Contact = () => {
             </h1>
             <p className="text-gray-400 text-lg md:text-xl leading-relaxed">
               Have a question about a product, order, or just want to say hi? <br className="hidden md:block"/>
-              We'd love to hear from you. Our team is ready to assist you 24/7.
+              We'd love to hear from you. Our Customer Support is available 24/7 online. For store visits, please check our store timings below
             </p>
          </div>
       </div>
@@ -74,8 +74,8 @@ const Contact = () => {
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500 font-bold uppercase">Email Us</p>
-                                <p className="text-gray-800 font-medium hover:text-purple-600 transition cursor-pointer">support@smartphonestore.com</p>
-                                <p className="text-gray-800 font-medium hover:text-purple-600 transition cursor-pointer">sales@smartphonestore.com</p>
+                                <p className="text-gray-800 font-medium hover:text-purple-600 transition cursor-pointer">support@swipekart.com</p>
+                                <p className="text-gray-800 font-medium hover:text-purple-600 transition cursor-pointer">sales@swipekart.com</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-4">
@@ -94,7 +94,7 @@ const Contact = () => {
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500 font-bold uppercase">Visit Us</p>
-                                <p className="text-gray-800 font-medium">123, Muthaliyar Street, <br/>  Thurgalaya Road, Thiruvarur - 610001.</p>
+                                <p className="text-gray-800 font-medium">355, Muthaliyar Street, <br/>  Thurgalaya Road, Thiruvarur - 610001.</p>
                             </div>
                         </div>
                     </div>
@@ -111,7 +111,7 @@ const Contact = () => {
                 <div className="bg-[#1a1c2e] p-6 rounded-2xl shadow-xl text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                        <FiClock /> Business Hours
+                        <FiClock /> Store Timings
                     </h3>
                     <ul className="space-y-3 text-sm text-gray-300">
                         <li className="flex justify-between border-b border-gray-700 pb-2"><span>Monday - Friday</span> <span>9:00 AM - 8:00 PM</span></li>

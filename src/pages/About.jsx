@@ -19,7 +19,7 @@ const About = () => {
             the Mobile Experience.
           </h1>
           <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Smartphone Store is not just a marketplace; it's a destination for tech enthusiasts. 
+            SwipeKart is not just a marketplace; it's a destination for tech enthusiasts. 
             We bring the latest innovation directly to your hands with trust and premium service.
           </p>
           <div className="flex justify-center gap-4">
@@ -67,7 +67,7 @@ const About = () => {
                Driven by Passion, <br/>Defined by Quality.
              </h2>
              <p className="text-gray-600 text-lg leading-relaxed mb-6">
-               Founded in 2024, <b>Smartphone Store</b> started with a simple mission: to make premium technology accessible to everyone without the hassle.
+               Founded in 2021, <b>SwipeKart</b> started with a simple mission: to make premium technology accessible to everyone without the hassle.
              </p>
              <p className="text-gray-600 text-lg leading-relaxed mb-8">
                We believe that buying a phone should be an exciting experience, not a stressful one. That's why we meticulously select every product, ensure secure packaging, and provide a warranty that you can trust.
