@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiHeart, FiShoppingCart, FiStar } from "react-icons/fi";
-import { FaBolt } from "react-icons/fa";
+// FiStar ஐ நீக்கிவிட்டு FaStar ஐ இங்கே சேர்த்துள்ளேன்
+import { FiHeart, FiShoppingCart } from "react-icons/fi"; 
+import { FaBolt, FaStar } from "react-icons/fa"; 
 
 const ProductCard = ({ product, wishlistItems, toggleWishlist, addToCart }) => {
   const { 
@@ -22,20 +23,29 @@ const ProductCard = ({ product, wishlistItems, toggleWishlist, addToCart }) => {
   // Discount Calculation
   const discount = mrp ? Math.round(((mrp - price) / mrp) * 100) : 0;
 
-  // Rating Stars Helper (Amazon Style)
+  // Rating Stars Helper (UPDATED FIX)
   const renderStars = (ratingValue) => {
-    // Ensure rating is a number
-    const safeRating = Number(ratingValue) || 0;
+    // 1. Ensure rating is a valid number, default to 0 if missing
+    const safeRating = parseFloat(ratingValue) || 0;
     
-    return [...Array(5)].map((_, i) => (
-      <FiStar 
-        key={i} 
-        // Logic: If rating is 4.5, Math.round is 5 (Full stars). 
-        // If rating is 4.2, Math.round is 4.
-        className={`${i < Math.round(safeRating) ? "fill-[#ffa41c] text-[#ffa41c]" : "fill-gray-200 text-gray-200"}`} 
-        size={14}
-      />
-    ));
+    // 2. Generate 5 stars
+    return [...Array(5)].map((_, i) => {
+        // Logic: Compare current index (i) with the rounded rating
+        // Example: Rating 3.2 -> Rounds to 3.
+        // i=0 (<3) -> Orange
+        // i=1 (<3) -> Orange
+        // i=2 (<3) -> Orange
+        // i=3 (<3 is False) -> Gray
+        const isActive = i < Math.round(safeRating);
+
+        return (
+          <FaStar 
+            key={i} 
+            size={14}
+            className={`${isActive ? "text-[#ffa41c]" : "text-gray-200"} transition-colors duration-200`}
+          />
+        );
+    });
   };
 
   return (
@@ -107,7 +117,7 @@ const ProductCard = ({ product, wishlistItems, toggleWishlist, addToCart }) => {
 
         {/* Ratings (Amazon Style) */}
         <div className="flex items-center gap-1 mb-3">
-           <div className="flex text-[#ffa41c]">
+           <div className="flex items-center gap-0.5">
              {renderStars(ratings)}
            </div>
            <span className="text-xs text-gray-400 font-medium ml-1">({numOfReviews})</span>
